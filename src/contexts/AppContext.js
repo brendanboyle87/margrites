@@ -12,6 +12,7 @@ const AppContextProvider = ({ children }) => {
     <AppContext.Provider
       value={{
         supabase,
+        auth: supabase.auth,
       }}
     >
       {children}
