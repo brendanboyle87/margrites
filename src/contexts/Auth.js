@@ -1,11 +1,12 @@
 import React, { useContext, useState, useEffect } from "react";
-import { supabase } from "../supabase";
+import { useAppContext } from "./AppContext";
 
 const AuthContext = React.createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
+  const { supabase } = useAppContext();
 
   useEffect(() => {
     // Check active sessions and sets the user
