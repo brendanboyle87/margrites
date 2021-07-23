@@ -1,13 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "../contexts/Auth";
-import { useHistory } from "react-router-dom";
 
 export function Login() {
   const emailRef = useRef();
+  const [submitted, setSubmitted] = useState(false);
 
   const { signIn } = useAuth();
-
-  const history = useHistory();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -21,11 +19,17 @@ export function Login() {
     if (error) {
       alert("error signing in");
     } else {
-      // Redirect user to Dashboard
-      history.push("/");
+      setSubmitted(true);
     }
   }
 
+  if (submitted) {
+    return (
+      <div>
+        <h1>Please check your email to sign in</h1>
+      </div>
+    );
+  }
   return (
     <>
       <form onSubmit={handleSubmit}>

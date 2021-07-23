@@ -1,21 +1,22 @@
 import React, { useContext, useState, useEffect } from "react";
-import { supabase } from "../supabase";
+import { useAppContext } from "./AppContext";
 
 const AuthContext = React.createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
+  const { auth } = useAppContext();
 
   useEffect(() => {
     // Check active sessions and sets the user
-    const session = supabase.auth.session();
+    const session = auth.session();
 
     setUser(session?.user ?? null);
     setLoading(false);
 
     // Listen for changes on auth state (logged in, signed out, etc.)
-    const { data: listener } = supabase.auth.onAuthStateChange(
+    const { data: listener } = auth.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
@@ -25,11 +26,12 @@ export function AuthProvider({ children }) {
     return () => {
       listener?.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const value = {
-    signIn: (data) => supabase.auth.signIn(data),
-    signOut: () => supabase.auth.signOut(),
+    signIn: (data) => auth.signIn(data),
+    signOut: () => auth.signOut(),
     user,
   };
 
