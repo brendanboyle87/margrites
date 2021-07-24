@@ -9,7 +9,6 @@ import { AppContextProvider } from "../contexts/AppContext";
 export default function App() {
   return (
     <div>
-      <h1>Margrites</h1>
       <AppContextProvider>
         <Router>
           <AuthProvider>
