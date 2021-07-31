@@ -24,7 +24,12 @@ export function Lobby() {
       .or(`player_one.eq.${user.id},player_two.eq.${user.id}`)
       .then((response) => response)
       .then((response) => setActiveGames(response.data));
-  }, [supabase, user.id, activeGames]);
+
+    return () => {
+      supabase.removeSubscription();
+      console.log("Remove supabase subscription by useEffect unmount");
+    };
+  }, []);
 
   async function handleSignOut() {
     // Ends user session
@@ -35,6 +40,12 @@ export function Lobby() {
   }
 
   async function handleCreateGame() {
+    const gameId = randomWords({
+      exactly: 1,
+      wordsPerString: 3,
+      separator: "-",
+    })[0];
+
     const gameState = {
       captures: { playerOne: 0, playerTwo: 0 },
       points: { playerOne: 0, playerTwo: 0 },
@@ -44,12 +55,6 @@ export function Lobby() {
         .fill()
         .map((x) => Array(9).fill("+")),
     };
-
-    const gameId = randomWords({
-      exactly: 1,
-      wordsPerString: 3,
-      separator: "-",
-    })[0];
 
     const game = {
       is_complete: false,
@@ -112,16 +117,20 @@ export function Lobby() {
       <div>
         <h1 className="my-5">Active Games</h1>
         <ul>
-          {activeGames
-            ? Array.from(activeGames).map((game) => (
+          {activeGames ? (
+            Array.from(activeGames).map((game) => (
+              <li key="{game.gameId}">
                 <Link
                   className="underline py-3 text-blue-400"
                   to={"/game/" + game.game_id}
                 >
                   {game.game_id}
                 </Link>
-              ))
-            : "No Active Games"}
+              </li>
+            ))
+          ) : (
+            <li key="no_games">"No Active Games"</li>
+          )}
         </ul>
       </div>
     </div>

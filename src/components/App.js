@@ -14,7 +14,7 @@ export default function App() {
         <Router>
           <AuthProvider>
             <Switch>
-              <PrivateRoute exact path="/" component={Lobby} activeGames={[]} />
+              <PrivateRoute exact path="/" component={Lobby} />
               <Route exact path="/login" component={Login} />
               <PrivateRoute exact path="/game/:gameId" component={Game} />
             </Switch>

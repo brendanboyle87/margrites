@@ -8,39 +8,50 @@ export function Game() {
 
   const { gameId } = useParams();
 
-  const [currentGame, setGame] = useState({});
+  const [currentGame, setGame] = useState(null);
 
-  const [gameListener, setGameListener] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   function handleNewGame(newGame) {
     setGame(newGame);
   }
 
+  function loadGame(game) {
+    setGame(game);
+    setLoading(false);
+  }
+
   useEffect(() => {
+    setLoading(true);
     supabase
       .from("game")
       .select("*")
       .eq("game_id", gameId)
       .then((response) => response.data[0])
-      .then((response) => setGame(response));
+      .then((response) => loadGame(response));
   }, []);
 
   useEffect(() => {
-    if (!gameListener && currentGame) {
-      setGameListener(
-        supabase
-          .from(`game:id=eq.${currentGame.id}`)
-          .on("UPDATE", (payload) => handleNewGame(payload.new))
-          .subscribe()
-      );
+    if (currentGame) {
+      supabase
+        .from(`game:id=eq.${currentGame.id}`)
+        .on("UPDATE", (payload) => handleNewGame(payload.new))
+        .subscribe();
     }
-  }, [currentGame, gameListener]);
+  }, []);
 
   return (
-    <div>
-      ${JSON.stringify(currentGame)}
-      <p>{currentGame.player_two || "Waiting for player two"}</p>
-      <div></div>
+    <div className="h-screen bg-white grid grid-cols-5">
+      <div className="col-span-3">test</div>
+      <div className="col-span-2">
+        {loading ? (
+          <p>Loading</p>
+        ) : (
+          <div>
+            <p>{currentGame.player_two || "Waiting for player two"}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
