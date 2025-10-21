@@ -70,24 +70,35 @@ export function App() {
     socket.send(JSON.stringify(payload));
   };
 
-  const handleConnect = () => {
-    if (!gameIdInput || !playerName) {
-      setStatus("Enter a game ID and name before joining");
+  const connectToGame = (targetGameId: string) => {
+    const trimmedName = playerName.trim();
+    const trimmedId = targetGameId.trim();
+    if (!trimmedName) {
+      setStatus("Enter your name before joining a game");
+      return;
+    }
+    if (!trimmedId) {
+      setStatus("Enter a game ID to join");
       return;
     }
 
+    setGameIdInput(trimmedId);
     socketRef.current?.close();
+    setStatus("Connecting…");
+    setBroadcast(null);
+    setSelectedPiece(null);
+    setLegalMoves([]);
+
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
     socketRef.current = socket;
-    setStatus("Connecting…");
 
     socket.onopen = () => {
       setStatus("Connected");
       const joinMessage: ClientMessage = {
         type: "join",
-        gameId: gameIdInput,
-        name: playerName
+        gameId: trimmedId,
+        name: trimmedName
       };
       socket.send(JSON.stringify(joinMessage));
     };
@@ -128,7 +139,15 @@ export function App() {
     };
   };
 
+  const handleConnect = () => {
+    connectToGame(gameIdInput);
+  };
+
   const handleCreateGame = async () => {
+    if (!playerName.trim()) {
+      setStatus("Enter your name before creating a game");
+      return;
+    }
     try {
       const response = await fetch("/api/games", {
         method: "POST",
@@ -138,8 +157,8 @@ export function App() {
         throw new Error("Failed to create game");
       }
       const { id } = await response.json();
-      setGameIdInput(id);
-      setStatus(`Created game ${id}. Share the ID to invite another player.`);
+      setStatus(`Created game ${id}. Connecting…`);
+      connectToGame(id);
     } catch (error) {
       console.error(error);
       setStatus("Unable to create game");
@@ -385,10 +404,20 @@ const BoardView = ({
     return { color: piece.owner, kind: "active" as const, pieceId };
   };
 
+  const rowOrder =
+    role === "white"
+      ? Array.from({ length: BOARD_ROWS }, (_, index) => index)
+      : Array.from({ length: BOARD_ROWS }, (_, index) => BOARD_ROWS - 1 - index);
+
+  const colOrder =
+    role === "white"
+      ? Array.from({ length: BOARD_COLUMNS }, (_, index) => BOARD_COLUMNS - 1 - index)
+      : Array.from({ length: BOARD_COLUMNS }, (_, index) => index);
+
   const rows = [];
-  for (let row = BOARD_ROWS - 1; row >= 0; row -= 1) {
+  for (const row of rowOrder) {
     const cells = [];
-    for (let col = 0; col < BOARD_COLUMNS; col += 1) {
+    for (const col of colOrder) {
       const { color, kind, pieceId } = getOccupant(row, col);
       const key = coordKey({ row, col });
       const isSelected = pieceId && pieceId === selectedPiece;
@@ -418,10 +447,10 @@ const BoardView = ({
 
   const orientationHint =
     role === "white"
-      ? "White scores by exiting at the bottom (rows decrease)."
+      ? "White view: your pieces start at the bottom; advance toward the top edge to score."
       : role === "black"
-      ? "Black scores by exiting at the top (rows increase)."
-      : "Black scores at the top edge; White scores at the bottom edge.";
+      ? "Black view: your pieces start at the bottom; advance toward the top edge to score."
+      : "Spectator view: Black home rows at the bottom, White at the top.";
 
   return (
     <div className="board-section">

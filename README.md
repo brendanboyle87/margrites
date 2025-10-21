@@ -38,6 +38,14 @@ npm run build
 
 Outputs production artifacts under `backend/dist` and `frontend/dist`.
 
+## Tests
+
+```bash
+npm test
+```
+
+Runs Vitest coverage for the shared game engine.
+
 ## Gameplay Notes
 
 - Two players join the same game ID; the first joined becomes Black, second White.
