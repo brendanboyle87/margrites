@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "rootDirs": [
+      "src",
+      "../shared/src"
+    ],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "composite": true
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
+}

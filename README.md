@@ -1,70 +1,46 @@
-# Getting Started with Create React App
+# Margrites Online
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Web application for playing the abstract strategy game Margrites. The implementation follows the rules from the accompanying PDF and keeps all state in memory.
 
-## Available Scripts
+## Project Structure
 
-In the project directory, you can run:
+- `backend/` – Express + WebSocket server that manages lobbies, setup, and gameplay.
+- `frontend/` – React client with lobby, setup, and live board play.
+- `shared/` – Game rules, types, and engine logic shared by both sides.
+- `docs/` – Summary of rules extracted from the PDF.
 
-### `yarn start`
+## Prerequisites
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Node.js 22.x (install with [fnm](https://github.com/Schniz/fnm) per workspace instructions).
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Install
 
-### `yarn test`
+```bash
+fnm use 22.21.0 # or fnm use --install-if-missing 22
+npm install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Development
 
-### `yarn build`
+Run backend (port 4000) and frontend (port 5173) together:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm run dev
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Visit http://localhost:5173 and share the generated game ID with the second player.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Build
 
-### `yarn eject`
+```bash
+npm run build
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Outputs production artifacts under `backend/dist` and `frontend/dist`.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Gameplay Notes
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Two players join the same game ID; the first joined becomes Black, second White.
+- Setup phase requires both players to place eight pieces within their two home rows and ready up.
+- Turns grant four moves; the server enforces legality, capture rules (2:1 adjacency), and automatic turn hand-off when no legal moves remain.
+- Game ends when one side has no pieces; score ties break on captures.
