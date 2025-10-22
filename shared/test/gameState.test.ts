@@ -23,14 +23,14 @@ const BLACK_SETUP = [
 ] as const;
 
 const WHITE_SETUP = [
+  { row: 6, col: 1 },
+  { row: 6, col: 3 },
+  { row: 6, col: 5 },
+  { row: 6, col: 7 },
   { row: 7, col: 1 },
   { row: 7, col: 3 },
   { row: 7, col: 5 },
-  { row: 7, col: 7 },
-  { row: 8, col: 1 },
-  { row: 8, col: 3 },
-  { row: 8, col: 5 },
-  { row: 8, col: 7 }
+  { row: 7, col: 7 }
 ] as const;
 
 const startStandardGame = (): GameState => {
@@ -176,22 +176,22 @@ describe("movement", () => {
         id: "black-0",
         owner: "black",
         status: "active",
-        position: { row: 8, col: 3 }
+        position: { row: 7, col: 3 }
       }
     };
-    state.board[coordKey({ row: 8, col: 3 })] = "black-0";
+    state.board[coordKey({ row: 7, col: 3 })] = "black-0";
     state.turnOrigins = {
-      "black-0": { row: 8, col: 3 }
+      "black-0": { row: 7, col: 3 }
     };
 
     const result = applyMove(state, "black", {
       pieceId: "black-0",
-      to: { row: 9, col: 3 }
+      to: { row: 8, col: 3 }
     });
 
     expect(result.ok).toBe(true);
     expect(state.scores.black).toBe(1);
     expect(state.pieces["black-0"].status).toBe("scored");
-    expect(state.board[coordKey({ row: 8, col: 3 })]).toBeUndefined();
+    expect(state.board[coordKey({ row: 7, col: 3 })]).toBeUndefined();
   });
 });

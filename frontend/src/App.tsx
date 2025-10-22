@@ -422,12 +422,14 @@ const BoardView = ({
       const key = coordKey({ row, col });
       const isSelected = pieceId && pieceId === selectedPiece;
       const isTarget = boardTargets.has(key);
+      const isSetupZone = row <= 1 || row >= BOARD_ROWS - 2;
       const cellClass = [
         "board-cell",
         isTarget ? "target" : "",
         isSelected ? "selected" : "",
         color ? `owner-${color}` : "",
-        kind === "setup" ? "setup-piece" : ""
+        kind === "setup" ? "setup-piece" : "",
+        isSetupZone ? "setup-zone" : ""
       ]
         .join(" ")
         .trim();

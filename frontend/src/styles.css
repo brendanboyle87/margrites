@@ -132,12 +132,26 @@ button:disabled {
 
 .board-grid {
   display: grid;
-  grid-template-rows: repeat(9, 48px);
-  grid-template-columns: repeat(8, 48px);
-  border: 2px solid #283042;
+  grid-template-rows: repeat(8, 52px);
+  grid-template-columns: repeat(9, 52px);
+  border: 3px solid #0d1018;
   border-radius: 0.6rem;
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 32px rgba(15, 17, 22, 0.45);
+  background: #f1f3f9;
+  position: relative;
+}
+
+.board-grid::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #ff4c4c;
+  transform: translateY(-1px);
+  pointer-events: none;
 }
 
 .board-row {
@@ -145,40 +159,54 @@ button:disabled {
 }
 
 .board-cell {
-  background: #111723;
-  border: 1px solid #1e2535;
-  font-size: 0.95rem;
-  color: #f8f8f8;
+  --cell-color: #f9fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cell-color);
+  border: 1px solid #0d1018;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2638;
+  transition: background 0.15s ease, color 0.15s ease, outline-color 0.15s ease;
 }
 
 .board-cell:hover {
-  background: #1a2335;
+  filter: brightness(0.93);
+}
+
+.board-cell.setup-zone {
+  --cell-color: #d1d3d9;
 }
 
 .board-cell.owner-black {
-  background: linear-gradient(135deg, #1f283b 0%, #2a3a5f 100%);
+  --cell-color: #1f283b;
+  color: #f7f9ff;
 }
 
 .board-cell.owner-white {
-  background: linear-gradient(135deg, #223249 0%, #37557a 100%);
-  color: #ffffff;
+  --cell-color: #ffffff;
+  color: #1b2132;
+  border-color: #0d1018;
 }
 
 .board-cell.setup-piece {
-  opacity: 0.65;
+  --cell-color: #c2c6cf;
+  color: #455067;
 }
 
 .board-cell.selected {
-  outline: 2px solid #ffc857;
+  outline: 3px solid #ffc857;
   outline-offset: -2px;
 }
 
 .board-cell.target {
-  background: #2742c4;
+  --cell-color: #274efd;
+  color: #ffffff;
 }
 
 .board-cell.target:hover {
-  background: #1f37a4;
+  filter: brightness(1.1);
 }
 
 .orientation-hint {

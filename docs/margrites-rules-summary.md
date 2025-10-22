@@ -1,9 +1,9 @@
 # Margrites Rules Summary
 
 ## Board
-- 9 rows by 8 columns.
-- Rows are indexed 0 (Black’s home edge) through 8 (White’s home edge); columns 0-7.
-- Setup zones: Black may place pieces on rows 0-1; White on rows 7-8.
+- 8 rows by 9 columns (matching the diagrams in the PDF).
+- Rows are indexed 0 (Black’s home edge) through 7 (White’s home edge); columns 0-8.
+- Setup zones: Black may place pieces on rows 0-1; White on rows 6-7.
 
 ## Pieces & Setup
 - Each player controls eight identical pieces.
