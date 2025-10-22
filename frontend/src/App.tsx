@@ -26,6 +26,7 @@ export function App() {
   const [messages, setMessages] = useState<string[]>([]);
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
   const [legalMoves, setLegalMoves] = useState<LegalMove[]>([]);
+  const [copyNotice, setCopyNotice] = useState<string | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -33,6 +34,12 @@ export function App() {
       socketRef.current?.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (!copyNotice) return;
+    const timer = window.setTimeout(() => setCopyNotice(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copyNotice]);
 
   useEffect(() => {
     if (!broadcast || !selectedPiece) {
@@ -83,6 +90,7 @@ export function App() {
     }
 
     setGameIdInput(trimmedId);
+    setCopyNotice(null);
     socketRef.current?.close();
     setStatus("Connecting…");
     setBroadcast(null);
@@ -162,6 +170,21 @@ export function App() {
     } catch (error) {
       console.error(error);
       setStatus("Unable to create game");
+    }
+  };
+
+  const handleCopyGameId = async () => {
+    const trimmedId = gameIdInput.trim();
+    if (!trimmedId) {
+      setCopyNotice("No game ID to copy");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(trimmedId);
+      setCopyNotice("Game ID copied!");
+    } catch (error) {
+      console.error("Copy failed", error);
+      setCopyNotice("Unable to copy");
     }
   };
 
@@ -305,14 +328,25 @@ export function App() {
             placeholder="Enter your name"
           />
         </div>
-        <div className="input-group">
+        <div className="input-group game-id-group">
           <label htmlFor="game-id">Game ID</label>
-          <input
-            id="game-id"
-            value={gameIdInput}
-            onChange={(event) => setGameIdInput(event.target.value)}
-            placeholder="Paste or generate a game ID"
-          />
+          <div className="game-id-row">
+            <input
+              id="game-id"
+              value={gameIdInput}
+              onChange={(event) => setGameIdInput(event.target.value)}
+              placeholder="Paste or generate a game ID"
+            />
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleCopyGameId}
+              disabled={!gameIdInput.trim()}
+            >
+              Copy ID
+            </button>
+          </div>
+          {copyNotice && <span className="copy-notice">{copyNotice}</span>}
         </div>
         <div className="button-row">
           <button onClick={handleCreateGame}>Create Game</button>
@@ -456,7 +490,9 @@ const BoardView = ({
 
   return (
     <div className="board-section">
-      <div className="board-grid">{rows}</div>
+      <div className="board-container">
+        <div className="board-grid">{rows}</div>
+      </div>
       <div className="orientation-hint">{orientationHint}</div>
     </div>
   );

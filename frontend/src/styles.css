@@ -99,11 +99,38 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.secondary-button {
+  background: #1f2638;
+  color: #e4e8f2;
+  padding: 0.45rem 0.75rem;
+  min-width: 92px;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: #2d3750;
+}
+
 .role-banner {
   font-size: 0.95rem;
   background: #182135;
   padding: 0.5rem 0.75rem;
   border-radius: 0.4rem;
+}
+
+.game-id-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.game-id-row input {
+  flex: 1;
+}
+
+.copy-notice {
+  font-size: 0.8rem;
+  color: #7dd77d;
+  margin-top: 0.25rem;
 }
 
 .main-layout {
@@ -117,6 +144,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  align-items: center;
 }
 
 .turn-indicator {
@@ -128,21 +156,31 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+}
+
+.board-container {
+  position: relative;
+  width: min(90vw, 520px);
+  max-width: 520px;
+  aspect-ratio: 9 / 8;
 }
 
 .board-grid {
+  position: absolute;
+  inset: 0;
   display: grid;
-  grid-template-rows: repeat(8, 52px);
-  grid-template-columns: repeat(9, 52px);
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   border: 3px solid #0d1018;
   border-radius: 0.6rem;
   overflow: hidden;
   box-shadow: 0 12px 32px rgba(15, 17, 22, 0.45);
   background: #f1f3f9;
-  position: relative;
 }
 
-.board-grid::after {
+.board-container::after {
   content: "";
   position: absolute;
   left: 0;
@@ -165,7 +203,7 @@ button:disabled {
   justify-content: center;
   background: var(--cell-color);
   border: 1px solid #0d1018;
-  font-size: 1rem;
+  font-size: clamp(0.6rem, 1.8vw, 1rem);
   font-weight: 600;
   color: #1f2638;
   transition: background 0.15s ease, color 0.15s ease, outline-color 0.15s ease;
@@ -212,6 +250,7 @@ button:disabled {
 .orientation-hint {
   font-size: 0.85rem;
   color: #9aa6be;
+  text-align: center;
 }
 
 .setup-controls {
