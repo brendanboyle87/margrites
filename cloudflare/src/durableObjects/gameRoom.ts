@@ -138,6 +138,8 @@ export class GameRoomDurableObject {
     return new Response(null, { status: 101, webSocket: client });
   }
 
+  private storageInitialized = false;
+
   private async ensureRoom(): Promise<GameRoom> {
     if (this.room) {
       return this.room;
@@ -145,7 +147,7 @@ export class GameRoomDurableObject {
 
     await this.state.blockConcurrencyWhile(async () => {
       if (this.room) return;
-      const stored = await this.state.storage.get<GameState>("state");
+      const stored = await this.loadStoredState();
       if (stored) {
         this.room = {
           state: stored,
@@ -170,9 +172,75 @@ export class GameRoomDurableObject {
     return this.room;
   }
 
+  private async loadStoredState(): Promise<GameState | undefined> {
+    await this.initializeStorage();
+    const execResult = await this.state.storage.sql.exec(
+      `SELECT state FROM game_rooms WHERE id = '${escapeSqlString(this.state.id.toString())}' LIMIT 1`
+    );
+    const firstResult = Array.isArray(execResult) ? execResult[0] : execResult.results?.[0];
+    if (!firstResult) {
+      return undefined;
+    }
+    const firstRow = firstResult.rows?.[0];
+    if (!firstRow) {
+      return undefined;
+    }
+    let raw: unknown;
+    if (Array.isArray(firstRow)) {
+      const stateIdx = firstResult.columns?.indexOf("state") ?? -1;
+      raw = stateIdx >= 0 ? firstRow[stateIdx] : firstRow[0];
+    } else {
+      const rowObject = firstRow as Record<string, unknown>;
+      if ("state" in rowObject) {
+        raw = rowObject.state;
+      } else if (firstResult.columns && firstResult.columns.length > 0) {
+        raw = rowObject[firstResult.columns[0]];
+      } else {
+        const values = Object.values(rowObject);
+        raw = values.length > 0 ? values[0] : undefined;
+      }
+    }
+    if (typeof raw !== "string") {
+      return undefined;
+    }
+    try {
+      return JSON.parse(raw) as GameState;
+    } catch (error) {
+      console.error("Failed to parse stored state", error);
+      return undefined;
+    }
+  }
+
   private async persistState(): Promise<void> {
     if (!this.room) return;
-    await this.state.storage.put("state", this.room.state);
+    await this.initializeStorage();
+    const id = this.state.id.toString();
+    const stateJson = JSON.stringify(this.room.state);
+    const timestamp = Date.now();
+    await this.state.storage.sql.exec(
+      `INSERT OR REPLACE INTO game_rooms (id, state, updated_at) VALUES ('${escapeSqlString(id)}', '${escapeSqlString(
+        stateJson
+      )}', ${timestamp})`
+    );
+  }
+
+  private async initializeStorage(): Promise<void> {
+    if (this.storageInitialized) {
+      return;
+    }
+    const result = this.state.storage.sql.exec(
+      `
+        CREATE TABLE IF NOT EXISTS game_rooms (
+          id TEXT PRIMARY KEY,
+          state TEXT NOT NULL,
+          updated_at INTEGER NOT NULL
+        )
+      `
+    );
+    if (result instanceof Promise) {
+      await result;
+    }
+    this.storageInitialized = true;
   }
 
   private removeConnection(connectionId: string): void {
@@ -218,8 +286,6 @@ export class GameRoomDurableObject {
   private async handleMessage(connectionId: string, message: ClientMessage): Promise<void> {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
-
-    console.log("handleMessage", { connectionId, type: message.type });
 
     switch (message.type) {
       case "join":
@@ -274,7 +340,6 @@ export class GameRoomDurableObject {
       connectionId: connection.id,
       role: assignedRole
     };
-    console.log("send ack", ack);
     this.send(connection.id, ack);
 
     if (assignedRole === "black" || assignedRole === "white") {
@@ -435,7 +500,6 @@ export class GameRoomDurableObject {
     };
 
     if (targetConnection) {
-      console.log("broadcast state (target)", { connectionId: targetConnection });
       this.send(targetConnection, message);
       return;
     }
@@ -446,7 +510,6 @@ export class GameRoomDurableObject {
         .filter((seat): seat is PlayerSeat => Boolean(seat))
         .map((seat) => seat.connectionId)
     ];
-    console.log("broadcast state (all)", { recipients });
     recipients.forEach((id) => this.send(id, message));
   }
 
@@ -467,7 +530,6 @@ export class GameRoomDurableObject {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
     try {
-      console.log("sending message", { connectionId, type: message.type });
       connection.socket.send(JSON.stringify(message));
     } catch (error) {
       console.error("Failed to send message", error);
@@ -509,3 +571,5 @@ export class GameRoomDurableObject {
 }
 
 const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+
+const escapeSqlString = (value: string): string => value.replace(/'/g, "''");

@@ -12,10 +12,22 @@ interface DurableObjectStub {
   fetch(input: Request | string, init?: RequestInit): Promise<Response>;
 }
 
+interface DurableObjectSqlResult {
+  results?: Array<{
+    columns?: string[];
+    rows?: Array<Record<string, unknown> | unknown[]>;
+  }>;
+}
+
+interface DurableObjectSqlStorage {
+  exec(query: string, params?: unknown[]): DurableObjectSqlResult | Promise<DurableObjectSqlResult>;
+}
+
 interface DurableObjectStorage {
   get<T>(key: string): Promise<T | undefined>;
   put<T>(key: string, value: T): Promise<void>;
   delete(key: string): Promise<boolean>;
+  sql: DurableObjectSqlStorage;
 }
 
 interface DurableObjectState {

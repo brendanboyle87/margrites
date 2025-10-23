@@ -1,4 +1,4 @@
-name = "margrites-worker"
+name = "margrites"
 main = "cloudflare/src/index.ts"
 compatibility_date = "2024-09-30"
 tsconfig = "./cloudflare/tsconfig.json"
@@ -9,6 +9,9 @@ bindings = [
   { name = "GAME_ROOMS", class_name = "GameRoomDurableObject" }
 ]
 
+[env.production]
+vars = { VITE_API_BASE = "https://margrites.brendanboyle87.workers.dev", VITE_WS_BASE = "wss://margrites.brendanboyle87.workers.dev" }
+
 [[migrations]]
 tag = "v1"
-new_classes = ["GameRoomDurableObject"]
+new_sqlite_classes = ["GameRoomDurableObject"]
