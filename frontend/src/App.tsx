@@ -16,6 +16,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type Role = "black" | "white" | "spectator" | undefined;
 
+const trimTrailingSlash = (value?: string): string | undefined =>
+  value ? value.replace(/\/+$/, "") : undefined;
+
+const API_BASE = trimTrailingSlash(import.meta.env.VITE_API_BASE);
+const WS_BASE = trimTrailingSlash(import.meta.env.VITE_WS_BASE);
+
 export function App() {
   const [gameIdInput, setGameIdInput] = useState("");
   const [playerName, setPlayerName] = useState("");
@@ -28,6 +34,16 @@ export function App() {
   const [legalMoves, setLegalMoves] = useState<LegalMove[]>([]);
   const [copyNotice, setCopyNotice] = useState<string | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+
+  const resolveApiPath = (path: string) => (API_BASE ? `${API_BASE}${path}` : path);
+
+  const buildWebSocketUrl = (gameId: string) => {
+    if (WS_BASE) {
+      return `${WS_BASE}/ws?gameId=${encodeURIComponent(gameId)}`;
+    }
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    return `${protocol}://${window.location.host}/ws?gameId=${encodeURIComponent(gameId)}`;
+  };
 
   useEffect(() => {
     return () => {
@@ -97,8 +113,7 @@ export function App() {
     setSelectedPiece(null);
     setLegalMoves([]);
 
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
+    const socket = new WebSocket(buildWebSocketUrl(trimmedId));
     socketRef.current = socket;
 
     socket.onopen = () => {
@@ -117,6 +132,7 @@ export function App() {
         case "ack":
           setConnectionId(parsed.connectionId);
           setRole(parsed.role);
+          sendMessage({ type: "requestState" });
           break;
         case "state":
           setBroadcast(parsed.payload);
@@ -157,7 +173,7 @@ export function App() {
       return;
     }
     try {
-      const response = await fetch("/api/games", {
+      const response = await fetch(resolveApiPath("/api/games"), {
         method: "POST",
         headers: { "Content-Type": "application/json" }
       });
