@@ -1,0 +1,14 @@
+name = "margrites-worker"
+main = "cloudflare/src/index.ts"
+compatibility_date = "2024-09-30"
+tsconfig = "./cloudflare/tsconfig.json"
+workers_dev = true
+
+[durable_objects]
+bindings = [
+  { name = "GAME_ROOMS", class_name = "GameRoomDurableObject" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["GameRoomDurableObject"]
