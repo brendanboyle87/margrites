@@ -83,6 +83,8 @@ Runs Vitest coverage for the shared game engine.
 
    The first deploy applies the `GameRoomDurableObject` migration and prints the Worker URL (e.g. `https://margrites-worker.your-subdomain.workers.dev`).
 
+   > **Note:** On the free plan you must enable Durable Object Storage (the SQLite-backed beta feature) for the Worker in the Cloudflare dashboard or via `wrangler`. The Worker code persists its game state using that storage layer.
+
 3. Build the frontend bundle:
 
    ```bash
@@ -119,6 +121,7 @@ If you prefer Cloudflare to build directly from this repository instead of uploa
    - Create a Cloudflare API token with Worker edit permissions (or reuse `wrangler login` in CI).
    - Add a CI step that runs `npm install` followed by `npx wrangler deploy` (the token can be provided via `CLOUDFLARE_API_TOKEN`, and account id via `CLOUDFLARE_ACCOUNT_ID`).
    - Alternatively, enable the Wrangler GitHub Action ([`cloudflare/wrangler-action`](https://github.com/cloudflare/wrangler-action)) to deploy on each push.
+   - Make sure the Worker has Durable Object Storage (SQLite) enabled in its settings so state persists on the free plan.
 
 3. **Routing**
    - Once both deployments are live, add a Pages custom domain or route (e.g. `game.example.com`) and configure a Worker route (`game.example.com/*`) pointing at the Worker. The frontend can then omit the base URLs and rely on same-origin requests.
